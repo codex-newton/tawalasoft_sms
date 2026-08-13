@@ -1,0 +1,102 @@
+{
+   "actions": [],
+   "allow_rename": 0,
+   "autoname": "field:phone",
+   "creation": "2026-08-13 09:32:34.893616",
+   "doctype": "DocType",
+   "engine": "InnoDB",
+   "field_order": [
+    "phone",
+    "active",
+    "column_break_main",
+    "source",
+    "opted_out_on",
+    "details_section",
+    "customer",
+    "notes"
+   ],
+   "fields": [
+    {
+     "description": "Normalised international format, e.g. 254712345678. Saved automatically.",
+     "fieldname": "phone",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "in_standard_filter": 1,
+     "label": "Phone",
+     "reqd": 1,
+     "unique": 1
+    },
+    {
+     "default": "1",
+     "description": "Untick to resume messages to this number.",
+     "fieldname": "active",
+     "fieldtype": "Check",
+     "in_list_view": 1,
+     "in_standard_filter": 1,
+     "label": "Active"
+    },
+    {
+     "fieldname": "column_break_main",
+     "fieldtype": "Column Break"
+    },
+    {
+     "default": "Manual",
+     "fieldname": "source",
+     "fieldtype": "Select",
+     "in_list_view": 1,
+     "label": "Source",
+     "options": "Manual\nCustomer Request\nInbound STOP\nProvider Blacklist"
+    },
+    {
+     "fieldname": "opted_out_on",
+     "fieldtype": "Datetime",
+     "label": "Opted Out On",
+     "read_only": 1
+    },
+    {
+     "fieldname": "details_section",
+     "fieldtype": "Section Break",
+     "label": "Details"
+    },
+    {
+     "description": "Optional. Which customer this number belongs to.",
+     "fieldname": "customer",
+     "fieldtype": "Link",
+     "label": "Customer",
+     "options": "Customer"
+    },
+    {
+     "description": "Who requested it and when, for your audit trail.",
+     "fieldname": "notes",
+     "fieldtype": "Small Text",
+     "label": "Notes"
+    }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 1,
+   "links": [],
+   "modified": "2026-08-13 11:00:00.000000",
+   "modified_by": "Administrator",
+   "module": "Tawalasoft Sms",
+   "name": "Tawalasoft SMS OptOut",
+   "owner": "Administrator",
+   "permissions": [
+    {
+     "create": 1,
+     "delete": 1,
+     "email": 1,
+     "export": 1,
+     "print": 1,
+     "read": 1,
+     "report": 1,
+     "role": "System Manager",
+     "share": 1,
+     "write": 1
+    }
+   ],
+   "row_format": "Dynamic",
+   "rows_threshold_for_grid_search": 20,
+   "sort_field": "modified",
+   "sort_order": "DESC",
+   "states": []
+  }

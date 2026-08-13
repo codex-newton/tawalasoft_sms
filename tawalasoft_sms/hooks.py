@@ -8,7 +8,7 @@ app_license = "mit"
 # Apps
 # ------------------
 
-# required_apps = []
+required_apps = ["frappe/erpnext"]
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
@@ -136,35 +136,53 @@ app_license = "mit"
 # Document Events
 # ---------------
 # Hook on document methods and events
+#
+# Delivery Note goes live first. The Sales Invoice hook is wired here, but
+# its Notification Rule record stays disabled until Delivery Note has run
+# clean. A hook firing with no enabled rule costs one indexed query.
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Delivery Note": {
+		"on_submit": "tawalasoft_sms.triggers.on_submit",
+	},
+	"Sales Invoice": {
+		"on_submit": "tawalasoft_sms.triggers.on_submit",
+	},
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"tawalasoft_sms.tasks.all"
-# 	],
-# 	"daily": [
-# 		"tawalasoft_sms.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"tawalasoft_sms.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"tawalasoft_sms.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"tawalasoft_sms.tasks.monthly"
-# 	],
+scheduler_events = {
+	"cron": {
+		"*/10 * * * *": [
+			"tawalasoft_sms.tasks.reconcile_pending_messages",
+			"tawalasoft_sms.tasks.retry_failed_messages",
+		],
+		"*/15 * * * *": [
+			"tawalasoft_sms.tasks.check_balance",
+		],
+	},
+}
+
+# Provider Registry
+# -----------------
+# Another app can contribute a gateway adapter without touching this one:
+#
+# sms_providers = {
+# 	"Africa's Talking": "myapp.providers.africas_talking.ATProvider",
 # }
+
+# Fixtures
+# --------
+# Promotes templates and rules between environments. Never fixture the
+# provider record: it holds the encrypted API token, and the encryption key
+# differs per site.
+
+fixtures = [
+	{"dt": "Tawalasoft SMS Template"},
+	{"dt": "Tawalasoft SMS Notification Rule"},
+]
 
 # Testing
 # -------
@@ -246,4 +264,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-

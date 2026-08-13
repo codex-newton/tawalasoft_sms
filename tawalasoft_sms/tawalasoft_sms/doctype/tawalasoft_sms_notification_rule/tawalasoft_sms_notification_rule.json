@@ -1,0 +1,185 @@
+{
+   "actions": [],
+   "allow_rename": 1,
+   "autoname": "field:rule_name",
+   "creation": "2026-08-13 09:31:57.817317",
+   "doctype": "DocType",
+   "engine": "InnoDB",
+   "field_order": [
+    "rule_name",
+    "reference_doctype",
+    "event",
+    "column_break_main",
+    "enabled",
+    "priority",
+    "message_section",
+    "template",
+    "column_break_message",
+    "sender_id",
+    "provider",
+    "recipient_section",
+    "recipient_type",
+    "recipient_field",
+    "column_break_recipient",
+    "static_recipients",
+    "condition_section",
+    "condition",
+    "condition_help"
+   ],
+   "fields": [
+    {
+     "fieldname": "rule_name",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "label": "Rule Name",
+     "reqd": 1
+    },
+    {
+     "fieldname": "reference_doctype",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "in_standard_filter": 1,
+     "label": "Reference Document Type",
+     "options": "DocType",
+     "reqd": 1
+    },
+    {
+     "default": "On Submit",
+     "fieldname": "event",
+     "fieldtype": "Select",
+     "in_list_view": 1,
+     "label": "Event",
+     "options": "On Submit\nOn Cancel\nAfter Insert\nOn Update After Submit",
+     "reqd": 1
+    },
+    {
+     "fieldname": "column_break_main",
+     "fieldtype": "Column Break"
+    },
+    {
+     "default": "0",
+     "description": "New rules start disabled. Enable only after testing.",
+     "fieldname": "enabled",
+     "fieldtype": "Check",
+     "in_list_view": 1,
+     "in_standard_filter": 1,
+     "label": "Enabled"
+    },
+    {
+     "default": "10",
+     "description": "Order of evaluation when several rules match the same event.",
+     "fieldname": "priority",
+     "fieldtype": "Int",
+     "label": "Priority"
+    },
+    {
+     "fieldname": "message_section",
+     "fieldtype": "Section Break",
+     "label": "Message"
+    },
+    {
+     "fieldname": "template",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "label": "Template",
+     "options": "Tawalasoft SMS Template",
+     "reqd": 1
+    },
+    {
+     "fieldname": "column_break_message",
+     "fieldtype": "Column Break"
+    },
+    {
+     "description": "Optional. Overrides the provider default sender ID.",
+     "fieldname": "sender_id",
+     "fieldtype": "Data",
+     "label": "Sender ID"
+    },
+    {
+     "description": "Optional. Leave blank to use the default provider.",
+     "fieldname": "provider",
+     "fieldtype": "Link",
+     "label": "Provider",
+     "options": "Tawalasoft SMS Provider"
+    },
+    {
+     "fieldname": "recipient_section",
+     "fieldtype": "Section Break",
+     "label": "Recipient"
+    },
+    {
+     "default": "Document Contact",
+     "description": "Document Contact resolves the customer's mobile from the document, its linked Contact, then the Customer record.",
+     "fieldname": "recipient_type",
+     "fieldtype": "Select",
+     "label": "Recipient Type",
+     "options": "Document Contact\nField on Document\nStatic Numbers",
+     "reqd": 1
+    },
+    {
+     "depends_on": "eval:doc.recipient_type == 'Field on Document'",
+     "description": "Fieldname holding the mobile number, e.g. contact_mobile.",
+     "fieldname": "recipient_field",
+     "fieldtype": "Data",
+     "label": "Recipient Field",
+     "mandatory_depends_on": "eval:doc.recipient_type == 'Field on Document'"
+    },
+    {
+     "fieldname": "column_break_recipient",
+     "fieldtype": "Column Break"
+    },
+    {
+     "depends_on": "eval:doc.recipient_type == 'Static Numbers'",
+     "description": "Comma-separated. For internal alerts to your own team, not customers.",
+     "fieldname": "static_recipients",
+     "fieldtype": "Small Text",
+     "label": "Static Recipients",
+     "mandatory_depends_on": "eval:doc.recipient_type == 'Static Numbers'"
+    },
+    {
+     "fieldname": "condition_section",
+     "fieldtype": "Section Break",
+     "label": "Condition"
+    },
+    {
+     "description": "Optional Python expression. The message is sent only if it evaluates true.",
+     "fieldname": "condition",
+     "fieldtype": "Code",
+     "label": "Condition",
+     "options": "PythonExpression"
+    },
+    {
+     "fieldname": "condition_help",
+     "fieldtype": "HTML",
+     "label": "Condition Help",
+     "options": "<p class='text-muted small'>Available variable: <code>doc</code>. Examples:<br><code>doc.grand_total &gt; 5000</code><br><code>doc.outstanding_amount &gt; 0</code><br><code>doc.customer_group == 'Commercial'</code></p><p class='text-muted small'>Returns and POS or consolidated invoices are always skipped, regardless of this condition.</p>"
+    }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 1,
+   "links": [],
+   "modified": "2026-08-13 11:30:00.000000",
+   "modified_by": "Administrator",
+   "module": "Tawalasoft Sms",
+   "name": "Tawalasoft SMS Notification Rule",
+   "owner": "Administrator",
+   "permissions": [
+    {
+     "create": 1,
+     "delete": 1,
+     "email": 1,
+     "export": 1,
+     "print": 1,
+     "read": 1,
+     "report": 1,
+     "role": "System Manager",
+     "share": 1,
+     "write": 1
+    }
+   ],
+   "row_format": "Dynamic",
+   "rows_threshold_for_grid_search": 20,
+   "sort_field": "modified",
+   "sort_order": "DESC",
+   "states": []
+  }

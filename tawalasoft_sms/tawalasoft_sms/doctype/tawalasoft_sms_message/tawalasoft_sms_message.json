@@ -1,0 +1,251 @@
+{
+   "actions": [],
+   "allow_rename": 0,
+   "autoname": "naming_series:",
+   "creation": "2026-08-13 09:31:01.914987",
+   "doctype": "DocType",
+   "engine": "InnoDB",
+   "field_order": [
+    "naming_series",
+    "phone",
+    "status",
+    "column_break_main",
+    "provider",
+    "sender_id",
+    "template",
+    "message_section",
+    "message",
+    "reference_section",
+    "reference_doctype",
+    "reference_name",
+    "column_break_reference",
+    "notification_rule",
+    "gateway_section",
+    "provider_message_id",
+    "parts",
+    "attempts",
+    "column_break_gateway",
+    "sent_at",
+    "delivered_at",
+    "next_attempt_at",
+    "error_section",
+    "error_code",
+    "error_message",
+    "failure_reason",
+    "raw_section",
+    "provider_response"
+   ],
+   "fields": [
+    {
+     "default": "TSMS-.YYYY.-",
+     "fieldname": "naming_series",
+     "fieldtype": "Select",
+     "hidden": 1,
+     "label": "Series",
+     "options": "TSMS-.YYYY.-",
+     "print_hide": 1
+    },
+    {
+     "description": "Normalised international format.",
+     "fieldname": "phone",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "in_standard_filter": 1,
+     "label": "Phone",
+     "reqd": 1,
+     "search_index": 1
+    },
+    {
+     "default": "Queued",
+     "fieldname": "status",
+     "fieldtype": "Select",
+     "in_list_view": 1,
+     "in_standard_filter": 1,
+     "label": "Status",
+     "options": "Queued\nSent\nDelivered\nFailed\nRejected\nDuplicate\nInsufficient Balance\nPending Confirmation\nConfiguration Error\nCancelled",
+     "reqd": 1,
+     "search_index": 1
+    },
+    {
+     "fieldname": "column_break_main",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "provider",
+     "fieldtype": "Link",
+     "label": "Provider",
+     "options": "Tawalasoft SMS Provider"
+    },
+    {
+     "fieldname": "sender_id",
+     "fieldtype": "Data",
+     "label": "Sender ID"
+    },
+    {
+     "fieldname": "template",
+     "fieldtype": "Link",
+     "label": "Template",
+     "options": "Tawalasoft SMS Template"
+    },
+    {
+     "fieldname": "message_section",
+     "fieldtype": "Section Break",
+     "label": "Message"
+    },
+    {
+     "description": "The body exactly as sent to the gateway.",
+     "fieldname": "message",
+     "fieldtype": "Small Text",
+     "in_list_view": 1,
+     "label": "Message",
+     "reqd": 1
+    },
+    {
+     "fieldname": "reference_section",
+     "fieldtype": "Section Break",
+     "label": "Source Document"
+    },
+    {
+     "fieldname": "reference_doctype",
+     "fieldtype": "Link",
+     "in_standard_filter": 1,
+     "label": "Reference Document Type",
+     "options": "DocType"
+    },
+    {
+     "fieldname": "reference_name",
+     "fieldtype": "Dynamic Link",
+     "label": "Reference Name",
+     "options": "reference_doctype",
+     "search_index": 1
+    },
+    {
+     "fieldname": "column_break_reference",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "notification_rule",
+     "fieldtype": "Link",
+     "label": "Notification Rule",
+     "options": "Tawalasoft SMS Notification Rule"
+    },
+    {
+     "fieldname": "gateway_section",
+     "fieldtype": "Section Break",
+     "label": "Gateway"
+    },
+    {
+     "description": "The gateway's own message reference.",
+     "fieldname": "provider_message_id",
+     "fieldtype": "Data",
+     "label": "Provider Message ID",
+     "read_only": 1
+    },
+    {
+     "description": "Billed SMS parts for this send.",
+     "fieldname": "parts",
+     "fieldtype": "Int",
+     "label": "Parts",
+     "read_only": 1
+    },
+    {
+     "default": "0",
+     "fieldname": "attempts",
+     "fieldtype": "Int",
+     "label": "Attempts",
+     "read_only": 1
+    },
+    {
+     "fieldname": "column_break_gateway",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "sent_at",
+     "fieldtype": "Datetime",
+     "label": "Sent At",
+     "read_only": 1
+    },
+    {
+     "fieldname": "delivered_at",
+     "fieldtype": "Datetime",
+     "label": "Delivered At",
+     "read_only": 1
+    },
+    {
+     "description": "Set when a retryable failure is parked for a later attempt.",
+     "fieldname": "next_attempt_at",
+     "fieldtype": "Datetime",
+     "label": "Next Attempt At",
+     "read_only": 1
+    },
+    {
+     "collapsible": 1,
+     "collapsible_depends_on": "eval:doc.error_code || doc.error_message || doc.failure_reason",
+     "fieldname": "error_section",
+     "fieldtype": "Section Break",
+     "label": "Errors"
+    },
+    {
+     "description": "Gateway response code, e.g. 0422.",
+     "fieldname": "error_code",
+     "fieldtype": "Data",
+     "label": "Error Code",
+     "read_only": 1
+    },
+    {
+     "description": "Why the gateway refused the request.",
+     "fieldname": "error_message",
+     "fieldtype": "Small Text",
+     "label": "Error Message",
+     "read_only": 1
+    },
+    {
+     "description": "Carrier's reason from the delivery report, e.g. absent subscriber.",
+     "fieldname": "failure_reason",
+     "fieldtype": "Small Text",
+     "label": "Failure Reason",
+     "read_only": 1
+    },
+    {
+     "collapsible": 1,
+     "fieldname": "raw_section",
+     "fieldtype": "Section Break",
+     "label": "Raw Response"
+    },
+    {
+     "description": "Verbatim gateway response, for support tickets.",
+     "fieldname": "provider_response",
+     "fieldtype": "Code",
+     "label": "Provider Response",
+     "options": "JSON",
+     "read_only": 1
+    }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 0,
+   "links": [],
+   "modified": "2026-08-13 11:45:00.000000",
+   "modified_by": "Administrator",
+   "module": "Tawalasoft Sms",
+   "name": "Tawalasoft SMS Message",
+   "owner": "Administrator",
+   "permissions": [
+    {
+     "delete": 1,
+     "email": 1,
+     "export": 1,
+     "print": 1,
+     "read": 1,
+     "report": 1,
+     "role": "System Manager",
+     "share": 1
+    }
+   ],
+   "row_format": "Dynamic",
+   "search_fields": "phone,status,reference_name",
+   "sort_field": "creation",
+   "sort_order": "DESC",
+   "states": [],
+   "title_field": "phone",
+   "track_changes": 1
+  }

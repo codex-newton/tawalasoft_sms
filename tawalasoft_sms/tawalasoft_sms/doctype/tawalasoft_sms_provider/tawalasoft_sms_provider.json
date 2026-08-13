@@ -1,0 +1,140 @@
+{
+   "actions": [],
+   "allow_rename": 1,
+   "autoname": "field:provider_name",
+   "creation": "2026-08-13 09:30:37.357058",
+   "doctype": "DocType",
+   "engine": "InnoDB",
+   "field_order": [
+    "provider_name",
+    "provider_type",
+    "column_break_main",
+    "enabled",
+    "is_default",
+    "priority",
+    "connection_section",
+    "base_url",
+    "api_token",
+    "column_break_connection",
+    "default_sender_id",
+    "timeout",
+    "costing_section",
+    "rate_per_part"
+   ],
+   "fields": [
+    {
+     "fieldname": "provider_name",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "label": "Provider Name",
+     "reqd": 1
+    },
+    {
+     "fieldname": "provider_type",
+     "fieldtype": "Select",
+     "in_list_view": 1,
+     "label": "Provider Type",
+     "options": "Mobile Sasa",
+     "reqd": 1
+    },
+    {
+     "fieldname": "column_break_main",
+     "fieldtype": "Column Break"
+    },
+    {
+     "default": "1",
+     "fieldname": "enabled",
+     "fieldtype": "Check",
+     "in_list_view": 1,
+     "label": "Enabled"
+    },
+    {
+     "description": "Only one provider may be the default. Setting this clears it on all others.",
+     "fieldname": "is_default",
+     "fieldtype": "Check",
+     "in_list_view": 1,
+     "label": "Is Default"
+    },
+    {
+     "default": "1",
+     "description": "Ascending order for failover when a second provider is added.",
+     "fieldname": "priority",
+     "fieldtype": "Int",
+     "label": "Priority"
+    },
+    {
+     "fieldname": "connection_section",
+     "fieldtype": "Section Break",
+     "label": "Connection"
+    },
+    {
+     "default": "https://api.mobilesasa.com",
+     "fieldname": "base_url",
+     "fieldtype": "Data",
+     "label": "Base URL",
+     "reqd": 1
+    },
+    {
+     "description": "Mobile Sasa API token. Begins with mbs_. Stored encrypted.",
+     "fieldname": "api_token",
+     "fieldtype": "Password",
+     "label": "API Token",
+     "reqd": 1
+    },
+    {
+     "fieldname": "column_break_connection",
+     "fieldtype": "Column Break"
+    },
+    {
+     "description": "Case-sensitive. Must be an approved sender ID on the account.",
+     "fieldname": "default_sender_id",
+     "fieldtype": "Data",
+     "label": "Default Sender ID",
+     "reqd": 1
+    },
+    {
+     "default": "20",
+     "fieldname": "timeout",
+     "fieldtype": "Int",
+     "label": "Timeout (Seconds)"
+    },
+    {
+     "fieldname": "costing_section",
+     "fieldtype": "Section Break",
+     "label": "Costing"
+    },
+    {
+     "description": "Cost per SMS part, for spend reporting.",
+     "fieldname": "rate_per_part",
+     "fieldtype": "Currency",
+     "label": "Rate Per Part"
+    }
+   ],
+   "grid_page_length": 50,
+   "index_web_pages_for_search": 1,
+   "links": [],
+   "modified": "2026-08-13 10:30:00.000000",
+   "modified_by": "Administrator",
+   "module": "Tawalasoft Sms",
+   "name": "Tawalasoft SMS Provider",
+   "owner": "Administrator",
+   "permissions": [
+    {
+     "create": 1,
+     "delete": 1,
+     "email": 1,
+     "export": 1,
+     "print": 1,
+     "read": 1,
+     "report": 1,
+     "role": "System Manager",
+     "share": 1,
+     "write": 1
+    }
+   ],
+   "row_format": "Dynamic",
+   "rows_threshold_for_grid_search": 20,
+   "sort_field": "modified",
+   "sort_order": "DESC",
+   "states": []
+  }
