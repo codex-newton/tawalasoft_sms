@@ -1,12 +1,16 @@
 # Copyright (c) 2026, Tawalasoft Solutions and contributors
 # For license information, please see license.txt
 
-"""Public entry points."""
+"""Public entry points.
+
+Everything that sends an SMS goes through queue_sms(). Nothing calls an
+adapter directly, and no document save ever waits on an HTTP call.
+"""
 
 import json
 
 import frappe
-from frappe.utils import add_to_date, now_datetime
+from frappe.utils import add_to_date, now_datetime, today
 
 from tawalasoft_sms.providers import get_provider
 from tawalasoft_sms.providers.base import (
@@ -18,6 +22,10 @@ from tawalasoft_sms.providers.base import (
 from tawalasoft_sms.utils.phone import is_valid_ke_mobile, normalise
 
 SETTINGS = "Tawalasoft SMS Settings"
+MESSAGE = "Tawalasoft SMS Message"
+
+# Statuses proving the gateway accepted the message.
+ACCEPTED_STATUSES = ("Sent", "Delivered")
 
 
 # --- outbound -------------------------------------------------------------
@@ -26,7 +34,12 @@ SETTINGS = "Tawalasoft SMS Settings"
 @frappe.whitelist()
 def queue_sms(phone, message, reference_doctype=None, reference_name=None,
               template=None, provider=None, sender_id=None,
-              notification_rule=None):
+              notification_rule=None, allow_duplicate=False):
+	"""Create a message record and hand it to the background queue.
+
+	Returns the record name, which is also the trackingId sent to the
+	gateway, so delivery reports join straight back to it.
+	"""
 	settings = frappe.get_cached_doc(SETTINGS)
 
 	if not settings.enabled:
@@ -38,13 +51,23 @@ def queue_sms(phone, message, reference_doctype=None, reference_name=None,
 		frappe.throw("{0} is not a valid mobile number.".format(phone))
 
 	if is_opted_out(number):
+		frappe.logger("tawalasoft_sms").info("Opted out; dropped message to %s", number)
 		return None
 
 	if settings.test_mode and settings.test_mode_phone:
 		number = settings.test_mode_phone
 
+	# The gateway refuses an identical message to the same number twice in one
+	# day. Catch it here so a duplicate costs a database lookup rather than an
+	# API call and a wasted record.
+	if not allow_duplicate and already_sent_today(number, message):
+		frappe.logger("tawalasoft_sms").info(
+			"Identical message already sent today; skipped %s", number
+		)
+		return None
+
 	doc = frappe.get_doc({
-		"doctype": "Tawalasoft SMS Message",
+		"doctype": MESSAGE,
 		"phone": number,
 		"message": message,
 		"status": QUEUED,
@@ -72,7 +95,17 @@ def enqueue_dispatch(sms_message):
 
 
 def dispatch_sms(sms_message):
-	doc = frappe.get_doc("Tawalasoft SMS Message", sms_message)
+	"""Background worker. One record, one send attempt.
+
+	Idempotent by design: a record the gateway has already accepted is never
+	sent again, no matter how many jobs fire for it.
+	"""
+	doc = frappe.get_doc(MESSAGE, sms_message)
+
+	# Evidence the gateway took it. Beats checking status alone, which would
+	# let a stale queued job re-send a message already marked Sent.
+	if doc.provider_message_id or doc.sent_at:
+		return doc.status
 
 	if doc.status in FINAL_STATUSES or doc.status == PENDING_CONFIRMATION:
 		return doc.status
@@ -122,6 +155,11 @@ def dispatch_sms(sms_message):
 
 @frappe.whitelist(allow_guest=True)
 def delivery_report(secret=None, **kwargs):
+	"""Delivery report webhook receiver.
+
+	Callbacks are unsigned, so the URL carries a secret held in settings.
+	Must answer 200 within five seconds, so this only validates and enqueues.
+	"""
 	expected = frappe.db.get_single_value(SETTINGS, "webhook_secret")
 
 	if not expected or secret != expected:
@@ -151,10 +189,11 @@ def process_delivery_report(payload):
 
 
 def apply_delivery_update(update):
-	if not frappe.db.exists("Tawalasoft SMS Message", update.tracking_id):
+	"""Idempotent. Webhooks are at-least-once and can arrive out of order."""
+	if not frappe.db.exists(MESSAGE, update.tracking_id):
 		return
 
-	doc = frappe.get_doc("Tawalasoft SMS Message", update.tracking_id)
+	doc = frappe.get_doc(MESSAGE, update.tracking_id)
 
 	if doc.status == update.status or doc.status in FINAL_STATUSES:
 		return
@@ -169,6 +208,16 @@ def apply_delivery_update(update):
 
 
 # --- helpers --------------------------------------------------------------
+
+
+def already_sent_today(number, message):
+	"""Mirror the gateway's same-day duplicate rule locally."""
+	return bool(frappe.db.exists(MESSAGE, {
+		"phone": number,
+		"message": message,
+		"status": ["in", ACCEPTED_STATUSES],
+		"creation": [">=", today()],
+	}))
 
 
 def is_opted_out(number):

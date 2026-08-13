@@ -178,10 +178,17 @@ scheduler_events = {
 # Promotes templates and rules between environments. Never fixture the
 # provider record: it holds the encrypted API token, and the encryption key
 # differs per site.
-
 fixtures = [
 	{"dt": "Tawalasoft SMS Template"},
 	{"dt": "Tawalasoft SMS Notification Rule"},
+	{
+		"dt": "Role",
+		"filters": [["name", "in", ["Tawalasoft SMS Manager"]]],
+	},
+	{
+		"dt": "Custom DocPerm",
+		"filters": [["role", "in", ["Tawalasoft SMS Manager"]]],
+	},
 ]
 
 # Testing

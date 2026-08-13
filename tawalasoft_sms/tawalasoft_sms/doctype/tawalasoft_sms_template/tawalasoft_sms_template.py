@@ -46,18 +46,28 @@ class TawalasoftSMSTemplate(Document):
 	def get_sample_context(self):
 		"""Render against a real document if one is chosen, otherwise against
 		placeholder values so the preview still works on a new template.
+
+		The real document is returned as a Document, not as_dict(): on a dict,
+		doc.items resolves to the built-in items() method rather than the
+		child table.
 		"""
 		if self.reference_doctype and self.sample_document:
 			if frappe.db.exists(self.reference_doctype, self.sample_document):
-				return frappe.get_doc(
-					self.reference_doctype, self.sample_document
-				).as_dict()
+				return frappe.get_doc(self.reference_doctype, self.sample_document)
 
 		return frappe._dict({
 			"name": "XXX-DN-2026-00000",
 			"customer_name": "SAMPLE CUSTOMER LIMITED",
+			"company": "Sample Company Ltd",
+			"driver_name": "Sample Driver",
+			"vehicle_no": "KXX 000X",
+			"shipping_address_name": None,
+			"total_qty": 2,
+			"items": [
+				frappe._dict({"item_name": "1000Ltr Tank", "qty": 1}),
+				frappe._dict({"item_name": "5000Ltr Tank", "qty": 1}),
+			],
 			"grand_total": 0.00,
 			"due_date": "2026-01-01",
 			"posting_date": "2026-01-01",
-			"total_qty": 0,
 		})

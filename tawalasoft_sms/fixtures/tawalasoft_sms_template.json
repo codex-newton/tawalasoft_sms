@@ -1,0 +1,17 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Tawalasoft SMS Template",
+  "enabled": 1,
+  "encoding": "GSM-7",
+  "estimated_characters": 352,
+  "estimated_parts": 3,
+  "message": "{%- set addr = frappe.db.get_value(\"Address\", doc.shipping_address_name, [\"address_line1\", \"city\"], as_dict=True) if doc.shipping_address_name else None -%}\n{%- set location = (addr and (addr.city or addr.address_line1)) or doc.shipping_address_name or \"-\" -%}\nHi {{ doc.customer_name }}, your order Delivery Note {{ doc.name }} has been dispatched.\nDriver: {{ doc.driver_name or \"-\" }}\nVehicle: {{ doc.vehicle_no or \"-\" }}\nDelivery Address: {{ location }}\nItems: {% for item in doc[\"items\"][:5] %}({{ item.item_name }} *{{ \"%g\"|format(item.qty) }}) {% endfor %}\nTotal Qty: {{ \"%g\"|format(doc.total_qty or 0) }}\nFor any queries contact 0712341662 / 0753060701.\nThank you for choosing {{ doc.company }}. Cash payment to the sales person is not acceptable.",
+  "modified": "2026-08-13 11:28:42.965334",
+  "name": "Delivery Note Dispatch",
+  "reference_doctype": "Delivery Note",
+  "rendered_preview": "Hi SAMPLE CUSTOMER LIMITED, your order Delivery Note XXX-DN-2026-00000 has been dispatched.\nDriver: Sample Driver\nVehicle: KXX 000X\nDelivery Address: -\nItems: (1000Ltr Tank *1) (5000Ltr Tank *1) \nTotal Qty: 2\nFor any queries contact 0712341662 / 0753060701.\nThank you for choosing Sample Company Ltd. Cash payment to the sales person is not acceptable.",
+  "sample_document": null,
+  "template_name": "Delivery Note Dispatch"
+ }
+]

@@ -3,9 +3,8 @@
 
 """Scheduled jobs.
 
-Three concerns, deliberately separate:
   reconcile_pending_messages - resolve sends whose outcome is unknown
-  retry_failed_messages      - re-attempt only what is genuinely retryable
+  retry_failed_messages      - re-attempt only what the gateway never took
   check_balance              - watch credit and alert before it runs out
 """
 
@@ -24,8 +23,7 @@ def reconcile_pending_messages():
 	"""Resolve messages whose send call failed mid-flight.
 
 	These must never be resent: the message may already be with the carrier.
-	We ask the gateway what happened, using our own record name as the
-	tracking id.
+	Ask the gateway what happened, using our record name as the tracking id.
 	"""
 	settings = frappe.get_cached_doc(SETTINGS)
 
@@ -45,8 +43,7 @@ def reconcile_pending_messages():
 
 	for row in pending:
 		try:
-			provider = get_provider(row.provider)
-			update = provider.fetch_status(row.name)
+			update = get_provider(row.provider).fetch_status(row.name)
 
 			if update:
 				apply_delivery_update(update)
@@ -62,8 +59,8 @@ def reconcile_pending_messages():
 def retry_failed_messages():
 	"""Re-queue messages parked for a later attempt.
 
-	Only statuses the adapter marked retryable get a next_attempt_at, so
-	this cannot resend a timeout or a rejected message.
+	The provider_message_id filter is the safety rail: anything the gateway
+	accepted is excluded outright, so this can never cause a double-send.
 	"""
 	settings = frappe.get_cached_doc(SETTINGS)
 
@@ -73,7 +70,10 @@ def retry_failed_messages():
 	due = frappe.get_all(
 		MESSAGE,
 		filters={
+			"status": ["in", ["Queued", "Insufficient Balance"]],
 			"next_attempt_at": ["<=", now_datetime()],
+			"provider_message_id": ["is", "not set"],
+			"sent_at": ["is", "not set"],
 			"attempts": ["<", settings.max_attempts or 3],
 		},
 		pluck="name",
@@ -112,7 +112,7 @@ def check_balance():
 	})
 	frappe.db.commit()
 
-	# Alert on the crossing, not on every poll, or you send an email every
+	# Alert on the crossing, not on every poll, or you get an email every
 	# fifteen minutes until someone tops up.
 	if threshold and info.units < threshold <= previous:
 		send_balance_alert(settings, info)

@@ -1,0 +1,20 @@
+[
+ {
+  "condition": null,
+  "docstatus": 0,
+  "doctype": "Tawalasoft SMS Notification Rule",
+  "enabled": 1,
+  "event": "On Submit",
+  "modified": "2026-08-13 11:33:45.206855",
+  "name": "Delivery Note Dispatch SMS",
+  "priority": 10,
+  "provider": null,
+  "recipient_field": null,
+  "recipient_type": "Document Contact",
+  "reference_doctype": "Delivery Note",
+  "rule_name": "Delivery Note Dispatch SMS",
+  "sender_id": null,
+  "static_recipients": null,
+  "template": "Delivery Note Dispatch"
+ }
+]

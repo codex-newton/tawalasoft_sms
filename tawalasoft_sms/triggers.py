@@ -52,7 +52,7 @@ def run_rules(doc, event):
 		try:
 			apply_rule(doc, rule)
 		except Exception:
-			# A messaging failure must never block the transaction.
+			# A messaging failure must never roll back the transaction.
 			frappe.log_error(
 				title="SMS rule failed",
 				message="Rule {0} on {1} {2}\n\n{3}".format(
@@ -141,7 +141,9 @@ def render_template(template_name, doc):
 		return None
 
 	try:
-		return frappe.render_template(template.message, {"doc": doc.as_dict()})
+		# Pass the document itself, not as_dict(). On a dict, doc.items
+		# resolves to the built-in items() method instead of the child table.
+		return frappe.render_template(template.message, {"doc": doc})
 	except Exception:
 		frappe.log_error(
 			title="SMS template render failed",
