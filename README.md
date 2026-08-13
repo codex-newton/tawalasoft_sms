@@ -571,7 +571,7 @@ tawalasoft_sms/
 from tawalasoft_sms.api import queue_sms
 
 queue_sms(
-    phone="0712345678",
+    phone="07*********",
     message="Your order has been dispatched.",
     reference_doctype="Delivery Note",   # optional
     reference_name="MAT-DN-2026-00001",  # optional
