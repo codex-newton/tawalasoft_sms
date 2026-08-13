@@ -248,7 +248,7 @@ Vehicle: {{ doc.vehicle_no or "-" }}
 Delivery Address: {{ location }}
 Items: {% for item in doc["items"][:5] %}({{ item.item_name }} *{{ "%g"|format(item.qty) }}) {% endfor %}
 Total Qty: {{ "%g"|format(doc.total_qty or 0) }}
-For any queries contact 0712341662 / 0753060701.
+For any queries contact 07*********.
 Thank you for choosing {{ doc.company }}. Cash payment to the sales person is not acceptable.
 ```
 
