@@ -24,6 +24,7 @@
     "provider_message_id",
     "parts",
     "attempts",
+    "lookup_attempts",
     "column_break_gateway",
     "sent_at",
     "delivered_at",
@@ -135,7 +136,7 @@
      "label": "Gateway"
     },
     {
-     "description": "The gateway's own message reference.",
+     "description": "The gateway's own message reference. Delivery report lookups key on this, not on the record name.",
      "fieldname": "provider_message_id",
      "fieldtype": "Data",
      "label": "Provider Message ID",
@@ -153,6 +154,14 @@
      "fieldname": "attempts",
      "fieldtype": "Int",
      "label": "Attempts",
+     "read_only": 1
+    },
+    {
+     "default": "0",
+     "description": "Times the gateway was asked about an unknown outcome and gave no answer.",
+     "fieldname": "lookup_attempts",
+     "fieldtype": "Int",
+     "label": "Lookup Attempts",
      "read_only": 1
     },
     {
@@ -193,7 +202,7 @@
      "read_only": 1
     },
     {
-     "description": "Why the gateway refused the request.",
+     "description": "Why the request did not succeed. May be a gateway refusal or a network failure.",
      "fieldname": "error_message",
      "fieldtype": "Small Text",
      "label": "Error Message",
@@ -213,7 +222,7 @@
      "label": "Raw Response"
     },
     {
-     "description": "Verbatim gateway response, for support tickets.",
+     "description": "Verbatim gateway response, for support tickets. Blank means no response was received at all.",
      "fieldname": "provider_response",
      "fieldtype": "Code",
      "label": "Provider Response",
@@ -224,7 +233,7 @@
    "grid_page_length": 50,
    "index_web_pages_for_search": 0,
    "links": [],
-   "modified": "2026-08-13 11:45:00.000000",
+   "modified": "2026-08-18 17:30:00.000000",
    "modified_by": "Administrator",
    "module": "Tawalasoft Sms",
    "name": "Tawalasoft SMS Message",
@@ -238,6 +247,15 @@
      "read": 1,
      "report": 1,
      "role": "System Manager",
+     "share": 1
+    },
+    {
+     "email": 1,
+     "export": 1,
+     "print": 1,
+     "read": 1,
+     "report": 1,
+     "role": "Tawalasoft SMS Manager",
      "share": 1
     }
    ],

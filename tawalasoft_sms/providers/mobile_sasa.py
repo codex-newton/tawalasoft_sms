@@ -13,9 +13,23 @@ Design notes
   Templates carry the document name so legitimate repeats get through.
 * On timeout we must not resend: the message may already be queued at the
   carrier. Return PENDING_CONFIRMATION and resolve via /v1/dlr.
+
+Identifier note
+---------------
+Two identifiers are in play and they are not interchangeable:
+
+  trackingId          our record name, echoed back on webhooks
+  messageId           the gateway's UUID, the key /v1/dlr looks up
+
+Webhooks use the first, lookups the second. Both are stored on the record.
 """
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+import frappe
 import requests
+from frappe.utils import get_system_timezone
 
 from tawalasoft_sms.providers.base import (
 	CONFIG_ERROR,
@@ -52,8 +66,35 @@ DLR_STATUSES = {
 	"delivered": DELIVERED,
 	"failed": FAILED,
 	"rejected": REJECTED,
+	"expired": FAILED,
+	"undelivered": FAILED,
 	"queued": QUEUED,
+	"submitted": SENT,
+	"sent": SENT,
 }
+
+
+def _parse_delivery_time(value):
+	"""Gateway returns ISO 8601 with an offset. Frappe Datetime columns are
+	naive and stored in the site timezone, so convert and drop the offset.
+	"""
+	if not value:
+		return None
+
+	try:
+		dt = datetime.fromisoformat(str(value))
+	except (ValueError, TypeError):
+		return None
+
+	if dt.tzinfo is not None:
+		try:
+			dt = dt.astimezone(ZoneInfo(get_system_timezone()))
+		except Exception:
+			pass
+
+		dt = dt.replace(tzinfo=None)
+
+	return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
 class MobileSasaProvider(SMSProvider):
@@ -161,29 +202,50 @@ class MobileSasaProvider(SMSProvider):
 
 		raw_status = str(payload.get("status") or "").strip().lower()
 
+		if raw_status not in DLR_STATUSES:
+			return []
+
 		return [
 			DeliveryUpdate(
 				tracking_id=payload.get("trackingId"),
-				status=DLR_STATUSES.get(raw_status, FAILED),
+				status=DLR_STATUSES[raw_status],
 				phone=payload.get("phone"),
-				delivered_at=payload.get("deliveredAt"),
-				reason=payload.get("reason") or payload.get("message"),
+				delivered_at=_parse_delivery_time(payload.get("deliveredAt")),
+				reason=payload.get("reason"),
 				raw=payload,
 			)
 		]
 
-	def fetch_status(self, tracking_id):
-		"""Pull lookup. Accepts our trackingId or the gateway's messageId."""
+	def fetch_status(self, tracking_id, provider_message_id=None):
+		"""Look up one message.
+
+		Keys on the gateway's messageId, not our trackingId. A successful
+		response carries no responseCode — only status: true and a messages
+		array, with the delivery state nested under deliveryStatus. The
+		top-level "message" field holds the SMS body, not a status.
+		"""
+		lookup_id = provider_message_id or tracking_id
+
+		if not lookup_id:
+			return None
+
 		try:
-			response = self._request("POST", "/v1/dlr", {"messageId": tracking_id})
+			response = self._request("POST", "/v1/dlr", {"messageId": lookup_id})
 			body = response.json()
 		except (requests.RequestException, ValueError):
 			return None
 
-		if str(body.get("responseCode")) != "0200":
+		if not body.get("status"):
 			return None
 
-		raw_status = str(body.get("message") or "").strip().lower()
+		messages = body.get("messages") or []
+
+		if not messages:
+			return None
+
+		entry = messages[0]
+		delivery = entry.get("deliveryStatus") or {}
+		raw_status = str(delivery.get("status") or "").strip().lower()
 
 		if raw_status not in DLR_STATUSES:
 			return None
@@ -191,18 +253,32 @@ class MobileSasaProvider(SMSProvider):
 		return DeliveryUpdate(
 			tracking_id=tracking_id,
 			status=DLR_STATUSES[raw_status],
+			phone=entry.get("phone"),
+			delivered_at=_parse_delivery_time(delivery.get("deliveryTime")),
+			reason=delivery.get("reason") or delivery.get("failureReason"),
 			raw=body,
 		)
 
 	def register_callback_url(self, url):
-		"""POST /v2/companies/ sets the account's DLR webhook URL."""
+		"""POST /v2/companies/ sets the account's DLR webhook URL.
+
+		Requires a token with the team:settings:manage scope. A send-only
+		token returns 0403 — set the URL in the provider portal instead.
+		"""
 		try:
 			response = self._request("POST", "/v2/companies/", {"callbackUrl": url})
 			body = response.json()
-		except (requests.RequestException, ValueError):
-			return False
+		except (requests.RequestException, ValueError) as exc:
+			frappe.throw("Could not reach the gateway: {0}".format(exc))
 
-		return str(body.get("responseCode")) in ("0200", "0201")
+		if str(body.get("responseCode")) in ("0200", "0201"):
+			return True
+
+		frappe.throw(
+			"Gateway refused the callback registration ({0}): {1}".format(
+				body.get("responseCode"), body.get("message")
+			)
+		)
 
 	# --- balance ----------------------------------------------------------
 
